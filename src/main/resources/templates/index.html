@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendador de tarefas</title>
+
+    <style>
+        .task {
+            max-width: 650px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            border: 1px #babfc7 solid;
+            border-radius: 8px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        #taskList {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        input[type="text"], input[type="datetime-local"], button {
+            margin: 5px;
+            padding: 8px;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        button {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Agendador de tarefas</h2>
+
+<ul id="taskList">
+    <!-- Aqui ficarão as tarefas adicionadas pelo usuário -->
+</ul>
+
+<div>
+    <input type="text" id="taskInput" placeholder="Descrição da tarefa:">
+    <input type="datetime-local" id="dueDateInput">
+    <button onclick="addTask(event)">Adicionar Tarefa</button>
+</div>
+
+<script>
+
+    function saveTask(task) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/tasks', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            console.log('Task saved successfully');
+        } else {
+            console.error('Error saving task:', xhr.statusText);
+        }
+    };
+
+    xhr.send(JSON.stringify(task));
+}
+
+    function addTask(event) { // Função para criar o objeto de task e depois adicionar o mesmo para a listagem
+        event.preventDefault();
+        var description = document.getElementById('taskInput').value;
+        var dueDateInput = document.getElementById('dueDateInput').value;
+
+        if (description.trim() !== '') {
+            var task = {
+                id: generateUniqueId(),  // Gera o ID unico para validar a posteriormente 
+
+                description: description,
+                dueDate: dueDateInput !== '' ? new Date(dueDateInput) : null,
+                completed: false
+            };
+            
+            addTaskToUI(task);
+            saveTask(task);
+            document.getElementById('taskInput').value = '';
+            document.getElementById('dueDateInput').value = '';
+        }
+    }
+
+    function addTaskToUI(task) { // Aloca o objeto da tarefa criado anteriormente para taskList
+        var taskList = document.getElementById('taskList');
+        taskList.classList.add('task');
+        var li = document.createElement('li');
+        li.setAttribute('data-task-id', task.id);
+        li.style.textAlign="left"
+        
+
+        var taskInfo = document.createTextNode(
+            task.description +
+            (task.dueDate ? ' (Deadline: ' + task.dueDate.toLocaleString() + ')' : '')
+        );
+
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = task.completed;
+        checkbox.addEventListener('change', function () {
+            task.completed = checkbox.checked;
+            saveTask(task);
+        });
+
+        var deleteButton = document.createElement('button');
+        deleteButton.innerHTML = 'X';
+        deleteButton.addEventListener('click', function () {
+            // Pass the task ID directly to deleteTask
+            deleteTask(task.id);
+        });
+
+        li.appendChild(checkbox);
+        li.appendChild(taskInfo);
+        li.appendChild(deleteButton);
+
+        taskList.appendChild(li);
+    }
+
+    function deleteTask(taskId) { // Função para validar e deletar tarefas, com try catch caso ocorra erro
+        if (taskId !== undefined && taskId !== null) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('DELETE', '/tasks/' + taskId, true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var taskList = document.getElementById('taskList');
+                    var taskElement = taskList.querySelector('[data-task-id="' + taskId + '"]');
+                    if (taskElement) {
+                        taskList.removeChild(taskElement);
+                    }
+                } else {
+                    console.error('Erro ao excluir a tarefa:', xhr.statusText);
+                }
+            };
+            xhr.send();
+        } else {
+            console.error('ID da tarefa indefinido ao tentar excluir.');
+        }
+    }
+
+    function generateUniqueId() {  // Aqui sera gerado o id unico do objeto task, depois sendo validado via foreach
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = Math.random() * 16 | 0,
+                v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
+</script>
+
+</body>
+</html>
