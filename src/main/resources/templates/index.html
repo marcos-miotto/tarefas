@@ -92,15 +92,16 @@
 
     xhr.send(JSON.stringify(task));
 }
-
-    function addTask(event) { // Função para criar o objeto de task e depois adicionar o mesmo para a listagem
+    // Função para criar o objeto de task e depois adicionar o mesmo para a listagem
+    function addTask(event) {
         event.preventDefault();
         var description = document.getElementById('taskInput').value;
         var dueDateInput = document.getElementById('dueDateInput').value;
 
         if (description.trim() !== '') {
             var task = {
-                id: generateUniqueId(),  // Gera o ID unico para validar a posteriormente 
+                // Gera o ID unico para validar a posteriormente
+                id: generateUniqueId(),
 
                 description: description,
                 dueDate: dueDateInput !== '' ? new Date(dueDateInput) : null,
@@ -113,8 +114,8 @@
             document.getElementById('dueDateInput').value = '';
         }
     }
-
-    function addTaskToUI(task) { // Aloca o objeto da tarefa criado anteriormente para taskList
+    // Aloca o objeto da tarefa criado anteriormente para taskList
+    function addTaskToUI(task) {
         var taskList = document.getElementById('taskList');
         taskList.classList.add('task');
         var li = document.createElement('li');
@@ -149,7 +150,8 @@
         taskList.appendChild(li);
     }
 
-    function deleteTask(taskId) { // Função para validar e deletar tarefas, com try catch caso ocorra erro
+    // Função para validar e deletar tarefas, com try catch caso ocorra erro
+    function deleteTask(taskId) {
         if (taskId !== undefined && taskId !== null) {
             var xhr = new XMLHttpRequest();
             xhr.open('DELETE', '/tasks/' + taskId, true);
@@ -169,8 +171,8 @@
             console.error('ID da tarefa indefinido ao tentar excluir.');
         }
     }
-
-    function generateUniqueId() {  // Aqui sera gerado o id unico do objeto task, depois sendo validado via foreach
+    // Aqui sera gerado o id unico do objeto task, depois sendo validado via foreach
+    function generateUniqueId() {
         return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
             var r = Math.random() * 16 | 0,
                 v = c === 'x' ? r : (r & 0x3 | 0x8);
