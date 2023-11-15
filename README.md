@@ -19,7 +19,7 @@ Para excluir uma tarefa, envie uma requisição DELETE para o endpoint /tasks/{t
 ### 4. Como executar
 
 - Clone o repositório:
-git clone https://github.com/marcos-miotto/TaskManagerBoot.git
+git clone https://github.com/marcos-miotto/tarefas.git
 cd tarefas-web
 
 - Compile e execute o projeto usando o Maven:
